@@ -56,6 +56,7 @@ namespace MessageNowApi.Hubs
                 User = await _userService.GetUserByUsername(username)
             };
             await _messageService.AddMessage(message);
+            message.Conversation = null;
             await Clients.Caller.SendAsync("CreateMessage", message);
             var friendUser = _mainHubRepository.GetUser(friend);
             if (read)
