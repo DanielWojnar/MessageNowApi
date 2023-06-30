@@ -28,14 +28,12 @@ namespace MessageNowApi.Services
 
         public async Task<FullConversationDto?> GetConversationById(int conversationId, string username)
         {
-            return await (from c in _context.Conversations
-                          where c.Id == conversationId
-                          select new FullConversationDto
-                          {
-                              Id = c.Id,
-                              Messages = c.Messages,
-                              Username = c.UserConvConnectors.First(x => !x.User.UserName.Equals(username)).User.UserName
-                          }).FirstOrDefaultAsync();
+            return await _context.Conversations.Where(c => c.Id == conversationId).Include(x => x.UserConvConnectors).ThenInclude(x => x.User).Include(c => c.Messages).ThenInclude(x => x.User).Select(x => new FullConversationDto
+            {
+                Id = x.Id,
+                Messages = x.Messages,
+                Username = x.UserConvConnectors.First(x => !x.User.UserName.Equals(username)).User.UserName
+            }).FirstOrDefaultAsync();
         }
 
         public async Task<Conversation?> GetConversationModel(int conversationId)
